@@ -1,15 +1,15 @@
 #include "nuscenes2bag/LidarDirectoryConverterXYZIR.hpp"
-#include "nuscenes2bag/utils.hpp"
+
 #include <exception>
+
+#include "nuscenes2bag/utils.hpp"
 
 using namespace sensor_msgs;
 using namespace std;
 
 namespace nuscenes2bag {
 
-inline void
-fillFieldsForPointcloudXYZIR(std::vector<PointField>& fields)
-{
+inline void fillFieldsForPointcloudXYZIR(std::vector<PointField>& fields) {
   PointField field;
   field.datatype = sensor_msgs::PointField::FLOAT32;
   field.offset = 0;
@@ -47,15 +47,13 @@ fillFieldsForPointcloudXYZIR(std::vector<PointField>& fields)
 }
 
 // Convert float32 to 4 bytes
-union
-{
+union {
   float value;
   uint8_t byte[4];
 } floatToBytes;
 
-inline void
-push_back_float32_XYZIR(std::vector<uint8_t>& data, float float_data)
-{
+inline void push_back_float32_XYZIR(std::vector<uint8_t>& data,
+                                    float float_data) {
   floatToBytes.value = float_data;
   data.push_back(floatToBytes.byte[0]);
   data.push_back(floatToBytes.byte[1]);
@@ -63,9 +61,7 @@ push_back_float32_XYZIR(std::vector<uint8_t>& data, float float_data)
   data.push_back(floatToBytes.byte[3]);
 }
 
-inline std::vector<float>
-readBinaryPcdFileXYZIR(std::ifstream& fin)
-{
+inline std::vector<float> readBinaryPcdFileXYZIR(std::ifstream& fin) {
   std::vector<float> fileValues;
   float f;
   while (fin.read(reinterpret_cast<char*>(&f), sizeof(float))) {
@@ -75,14 +71,12 @@ readBinaryPcdFileXYZIR(std::ifstream& fin)
   return fileValues;
 }
 
-boost::optional<sensor_msgs::PointCloud2>
-readLidarFileXYZIR(const fs::path& filePath)
-{
-
+boost::optional<sensor_msgs::PointCloud2> readLidarFileXYZIR(
+    const fs::path& filePath) {
   PointCloud2 cloud;
   cloud.header.frame_id = std::string("lidar");
   cloud.is_bigendian = false;
-  cloud.point_step = sizeof(float) * 5; // Length of each point in bytes
+  cloud.point_step = sizeof(float) * 5;  // Length of each point in bytes
   cloud.height = 1;
 
   try {
@@ -102,7 +96,7 @@ readLidarFileXYZIR(const fs::path& filePath)
 
     fillFieldsForPointcloudXYZIR(cloud.fields);
     cloud.data = data;
-    cloud.row_step = data.size(); // Length of row in bytes
+    cloud.row_step = data.size();  // Length of row in bytes
 
   } catch (const std::exception& e) {
     PRINT_EXCEPTION(e);
@@ -113,4 +107,4 @@ readLidarFileXYZIR(const fs::path& filePath)
   return boost::optional<sensor_msgs::PointCloud2>(cloud);
 }
 
-}
+}  // namespace nuscenes2bag

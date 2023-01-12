@@ -1,13 +1,15 @@
-#pragma once 
+#pragma once
 
 #include <chrono>
 
 namespace nuscenes2bag {
 
-template <typename T> class RunEvery {
+template <typename T>
+class RunEvery {
 public:
   RunEvery(std::chrono::milliseconds periodMs, T &&lambda)
-      : periodMs(periodMs), lastExecutionTime(std::chrono::system_clock::now()),
+      : periodMs(periodMs),
+        lastExecutionTime(std::chrono::system_clock::now()),
         lambda(lambda) {}
 
   void update() {
@@ -25,4 +27,4 @@ public:
   T lambda;
 };
 
-}
+}  // namespace nuscenes2bag

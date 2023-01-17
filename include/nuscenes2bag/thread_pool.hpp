@@ -112,11 +112,10 @@ public:
       class F,
       class... Args>  // Below is the return type...Yes it is ridiculous, but it
                       // works. Enabled if policy_tpye IS NOT PRIORITY
-                      typename std::enable_if<
-                          !std::is_same<policy_type, PRIORITY>::value,
-                          std::future<
-                              typename std::result_of<F(Args...)>::type>>::type
-                      enqueue(F&& f, Args&&... args) {
+  typename std::enable_if<
+      !std::is_same<policy_type, PRIORITY>::value,
+      std::future<typename std::result_of<F(Args...)>::type>>::type
+  enqueue(F&& f, Args&&... args) {
     typedef typename std::result_of<F(Args...)>::type return_type;
     if (!isActive.load())  // Don't allow enqueueing after stopping the pool
       throw std::runtime_error("enqueue on stopped ThreadPool");
@@ -136,11 +135,10 @@ public:
   template <class F,
             class... Args>  // Below is the return type...Yes it is ridiculous,
                             // but it works. Enabled if policy_tpye IS PRIORITY
-                            typename std::enable_if<
-                                std::is_same<policy_type, PRIORITY>::value,
-                                std::future<typename std::result_of<
-                                    F(Args...)>::type>>::type
-                            enqueue(int priority, F&& f, Args&&... args) {
+  typename std::enable_if<
+      std::is_same<policy_type, PRIORITY>::value,
+      std::future<typename std::result_of<F(Args...)>::type>>::type
+  enqueue(int priority, F&& f, Args&&... args) {
     typedef typename std::result_of<F(Args...)>::type return_type;
     // Don't allow enqueueing after stopping the pool
     if (!isActive.load())

@@ -14,6 +14,7 @@ public:
   NuScenes2Bag();
 
   void convertDirectory(const fs::path &inDatasetPath,
+                        const fs::path &metadataPath,
                         const std::string &version,
                         const fs::path &outputRosbagPath, int32_t threadNumber,
                         boost::optional<int32_t> sceneNumberOpt);

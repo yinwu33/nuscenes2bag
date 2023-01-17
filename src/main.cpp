@@ -9,7 +9,8 @@ using namespace nuscenes2bag;
 
 int main(const int argc, const char* argv[]) {
   try {
-    std::string dataroot;
+    std::string data_root;
+    std::string metadata_folder;
     std::string version = "v1.0-mini";
     std::string outputBagName;
     int32_t threadNumber = -1;
@@ -19,15 +20,20 @@ int main(const int argc, const char* argv[]) {
     desc.add_options()("help,h", "show help");
 
     options_description inputDesc{"input"};
-    inputDesc.add_options()("scene_number,n", value<int32_t>(&sceneNumber),
-                            "only convert a given scene")(
-        "dataroot,s", value<std::string>(&dataroot)->required(),
+    // clang-format off
+    inputDesc.add_options()(
+        "scene_number,n", value<int32_t>(&sceneNumber), "only convert a given scene")(
+        "data_folder,s", value<std::string>(&data_root)->required(),
         "Path to root of dataset containing 'maps', 'samples', 'sweeps'")(
         "version", value<std::string>(&version),
         "Version string (default = 'v1.0-mini')")(
         "out,o", value<std::string>(&outputBagName), "output bag name")(
         "jobs,j", value<int32_t>(&threadNumber),
-        "number of jobs (thread number)");
+        "number of jobs (thread number)")(
+        "metadata_folder,m", value<std::string>(&metadata_folder)->required(),
+        "Path to root of metadata"
+    );
+    // clang-format on
     variables_map vm;
 
     desc.add(inputDesc);
@@ -40,14 +46,14 @@ int main(const int argc, const char* argv[]) {
     } else {
       NuScenes2Bag converter{};
 
-      fs::path sampleDirPath(dataroot);
+      fs::path sampleDirPath(data_root);
 
       boost::optional<int32_t> sceneNumberOpt;
       if (sceneNumber > 0) {
         sceneNumberOpt = sceneNumber;
       }
-      converter.convertDirectory(sampleDirPath, version, outputBagName,
-                                 threadNumber, sceneNumberOpt);
+      converter.convertDirectory(sampleDirPath, metadata_folder, version,
+                                 outputBagName, threadNumber, sceneNumberOpt);
     }
   } catch (const error& ex) {
     std::cerr << ex.what() << '\n';

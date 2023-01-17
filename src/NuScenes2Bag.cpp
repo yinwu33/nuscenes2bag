@@ -30,10 +30,11 @@ namespace nuscenes2bag {
 
 NuScenes2Bag::NuScenes2Bag() {}
 
-void NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
-                                    const std::string& version,
-                                    const fs::path& outputRosbagPath,
-                                    int threadNumber,
+void NuScenes2Bag::convertDirectory(const fs::path &inDatasetPath,
+                                    const fs::path &metadataPath,
+                                    const std::string &version,
+                                    const fs::path &outputRosbagPath,
+                                    int32_t threadNumber,
                                     boost::optional<int32_t> sceneNumberOpt) {
   if ((threadNumber < 1) || (threadNumber > 64)) {
     std::cout << "Forcing at least one job number (-j1)" << std::endl;
@@ -42,15 +43,15 @@ void NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
 
   MetaDataReader metaDataReader;
 
-  fs::path metadataPath = inDatasetPath;
-  metadataPath /= fs::path(version);  // Append sub-directory
+  //  fs::path metadataPath = inDatasetPath;
+  //  metadataPath /= fs::path(version);  // Append sub-directory
   std::cout << "Loading metadata from " + metadataPath.string() + " ..."
             << std::endl;
 
   try {
     // If file is not found, a runtime_error is thrown
     metaDataReader.loadFromDirectory(metadataPath);
-  } catch (const runtime_error& e) {
+  } catch (const runtime_error &e) {
     std::cerr << "Error: " << e.what() << '\n';
     std::exit(-1);
   }
@@ -87,11 +88,11 @@ void NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
     ;
   }
 
-  for (const auto& sceneToken : chosenSceneTokens) {
+  for (const auto &sceneToken : chosenSceneTokens) {
     std::unique_ptr<SceneConverter> sceneConverter =
         std::make_unique<SceneConverter>(metaDataReader);
     sceneConverter->submit(sceneToken, fileProgress);
-    SceneConverter* sceneConverterPtr = sceneConverter.get();
+    SceneConverter *sceneConverterPtr = sceneConverter.get();
     sceneConverters.push_back(std::move(sceneConverter));
     boost::asio::defer(pool, [&, sceneConverterPtr]() {
       sceneConverterPtr->run(inDatasetPath, outputRosbagPath, fileProgress);
@@ -133,7 +134,7 @@ void NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
 
   int counter = 0;
 
-  for (const auto& sceneToken : chosenSceneTokens) {
+  for (const auto &sceneToken : chosenSceneTokens) {
     boost::shared_ptr<SceneConverter> sceneConverter =
         boost::make_shared<SceneConverter>(SceneConverter(metaDataReader));
     sceneConverter->submit(sceneToken, fileProgress);
